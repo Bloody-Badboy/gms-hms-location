@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">GMS HMS Location</string>
+    <string name="request_location_update">Request Location Update</string>
+</resources>

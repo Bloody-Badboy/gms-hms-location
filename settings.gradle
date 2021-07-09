@@ -1,0 +1,3 @@
+rootProject.name = "GMS HMS Location"
+include ':app'
+include ':location-engine'
