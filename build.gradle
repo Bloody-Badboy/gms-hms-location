@@ -23,6 +23,12 @@ allprojects {
         jcenter() // Warning: this repository is going to shut down soon
         maven { url 'https://developer.huawei.com/repo/' }
     }
+
+    plugins.withId("com.vanniktech.maven.publish") {
+        mavenPublish {
+            sonatypeHost = "S01"
+        }
+    }
 }
 
 subprojects {
