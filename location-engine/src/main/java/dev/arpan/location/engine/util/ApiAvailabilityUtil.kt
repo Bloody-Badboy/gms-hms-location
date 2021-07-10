@@ -1,4 +1,4 @@
-package dev.arpan.location.engine
+package dev.arpan.location.engine.util
 
 import android.content.Context
 import com.google.android.gms.common.GoogleApiAvailability

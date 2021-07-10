@@ -1,8 +1,8 @@
-package dev.arpan.location.engine
+package dev.arpan.location.engine.model
 
 import android.location.Location
 
-data class LocationData(
+data class Location(
     val latitude: Double,
     val longitude: Double,
     val accuracy: Float,
@@ -12,7 +12,7 @@ data class LocationData(
     val timestamp: Long
 ) {
     companion object {
-        fun fromLocation(location: Location) = LocationData(
+        fun fromLocation(location: Location) = Location(
             location.latitude,
             location.longitude,
             location.accuracy,
