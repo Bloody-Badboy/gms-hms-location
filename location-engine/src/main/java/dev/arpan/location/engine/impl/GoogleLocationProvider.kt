@@ -15,10 +15,10 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsStatusCodes
 import dev.arpan.location.engine.GoogleResolvableApiException
 import dev.arpan.location.engine.ILocationFetcher
-import dev.arpan.location.engine.LocationData
 import dev.arpan.location.engine.LocationReceiver
 import dev.arpan.location.engine.LocationSettingCallback
 import dev.arpan.location.engine.ResolvableApiException
+import dev.arpan.location.engine.model.Location
 import timber.log.Timber
 
 internal class GoogleLocationProvider(
@@ -48,7 +48,7 @@ internal class GoogleLocationProvider(
             locationResult?.let {
                 if (it.locations.isNotEmpty()) {
                     val location = it.locations[0]
-                    locationReceiver?.onReceived(LocationData.fromLocation(location))
+                    locationReceiver?.onReceived(Location.fromLocation(location))
                 }
             }
         }

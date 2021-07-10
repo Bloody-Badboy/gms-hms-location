@@ -1,51 +1,46 @@
 package dev.arpan.location.engine.demo
 
-import android.Manifest
-import android.app.Activity
+import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
-import dev.arpan.location.engine.LocationData
 import dev.arpan.location.engine.LocationFetcher
 import dev.arpan.location.engine.LocationReceiver
-import dev.arpan.location.engine.LocationSettingCallback
-import dev.arpan.location.engine.ResolvableApiException
+import dev.arpan.location.engine.LocationSettingsActivity
 import dev.arpan.location.engine.demo.databinding.ActivityMainBinding
+import dev.arpan.location.engine.model.Location
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            onLocationPermissionGranted()
-        } else {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT)
-                .show()
-        }
-    }
-
-    private val intentSenderLauncher = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
+    private val activityResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
     ) { activityResult ->
-        if (activityResult.resultCode == Activity.RESULT_OK) {
-            startLocationUpdates()
-        } else {
-            Toast.makeText(this, "GPS not enabled!", Toast.LENGTH_SHORT).show()
+        when (activityResult.resultCode) {
+            RESULT_OK -> {
+                fetcher.startLocationUpdates()
+            }
+            LocationSettingsActivity.RESULT_PERMISSION_DENIED -> {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
+            }
+            LocationSettingsActivity.RESULT_PERMANENTLY_PERMISSION_DENIED -> {
+                Toast.makeText(this, "Location permission permanently denied", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            LocationSettingsActivity.RESULT_GPS_NOT_ENABLED -> {
+                Toast.makeText(this, "GPS not enabled", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -54,9 +49,9 @@ class MainActivity : AppCompatActivity() {
             context = this,
             updateInterval = 4000L,
             locationReceiver = object : LocationReceiver {
-                override fun onReceived(locationData: LocationData) {
-                    binding.tvLocation.text = locationData.toString()
-                    getAddress(locationData)
+                override fun onReceived(location: Location) {
+                    binding.tvLocation.text = location.toString()
+                    getAddress(location)
                 }
             }
         )
@@ -70,34 +65,11 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.button.setOnClickListener {
-            permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            activityResultLauncher.launch(Intent(this, LocationSettingsActivity::class.java))
         }
     }
 
-    private fun onLocationPermissionGranted() {
-        fetcher.checkDeviceLocationSettings(object : LocationSettingCallback {
-            override fun onResultResolutionRequired(resolvable: ResolvableApiException) {
-                intentSenderLauncher.launch(
-                    IntentSenderRequest.Builder(resolvable.getResolution()).build()
-                )
-            }
-
-            override fun onResultSettingsChangeUnavailable() {
-                Timber.d("onResultSettingsChangeUnavailable")
-            }
-
-            override fun onResultSuccess() {
-                Timber.d("onResultSuccess")
-                startLocationUpdates()
-            }
-        })
-    }
-
-    private fun startLocationUpdates() {
-        fetcher.startLocationUpdates()
-    }
-
-    private fun getAddress(latLong: LocationData) {
+    private fun getAddress(latLong: Location) {
         geoCoderJob?.cancel()
         geoCoderJob = lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {

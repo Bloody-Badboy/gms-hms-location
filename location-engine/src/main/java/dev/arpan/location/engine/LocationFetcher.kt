@@ -3,6 +3,7 @@ package dev.arpan.location.engine
 import android.content.Context
 import dev.arpan.location.engine.impl.GoogleLocationProvider
 import dev.arpan.location.engine.impl.HMSLocationProvider
+import dev.arpan.location.engine.util.ApiAvailabilityUtil
 
 class LocationFetcher(
     context: Context,
