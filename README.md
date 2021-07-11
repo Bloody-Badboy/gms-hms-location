@@ -8,14 +8,21 @@ A library to request location update for both GMS and HMS with less boilerplate 
 
 # Usages
 Create `LocationRequest` object
+```kotlin
+private val locationRequest = LocationRequest().apply {
+    priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    interval = 20000L
+    fastestInterval = 10000L
+}
+```
 
 Initialize `LocationFetcher` in your activity or fragment
 ```kotlin
  private val fetcher: LocationFetcher by lazy {
         LocationFetcher(
             context = this,
-            updateInterval = 4000L, // location update interval
-            locationReceiver = object : LocationReceiver {
+            request = locationRequest, // location request
+            receiver = object : LocationReceiver {
                 override fun onReceived(location: Location) {
                    // TODO: do something with location
                 }
@@ -26,7 +33,11 @@ Initialize `LocationFetcher` in your activity or fragment
 
 Start `LocationSettingsActivity` to check location permission and device GPS settings to request location update
 ```kotlin
-startActivityForResult(Intent(this, LocationSettingsActivity::class.java), 100)
+startActivityForResult(
+                LocationSettingsActivity.buildIntent(
+                    this,
+                    locationRequest
+                ), 100)
 ```
 
 check the result in `onActivityResult` and start location update
