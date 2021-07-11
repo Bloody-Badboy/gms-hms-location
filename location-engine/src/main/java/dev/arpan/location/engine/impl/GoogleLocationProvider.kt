@@ -23,15 +23,9 @@ import timber.log.Timber
 
 internal class GoogleLocationProvider(
     private val context: Context,
-    private val updateInterval: Long,
+    private val locationRequest: LocationRequest,
     private val locationReceiver: LocationReceiver?
 ) : ILocationFetcher {
-
-    private val locationRequest = LocationRequest.create().apply {
-        interval = updateInterval
-        fastestInterval = updateInterval / 2
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
 
     private val locationSettingsRequest = LocationSettingsRequest.Builder()
         .addLocationRequest(locationRequest)

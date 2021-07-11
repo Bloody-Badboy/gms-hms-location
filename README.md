@@ -7,8 +7,9 @@ A library to request location update for both GMS and HMS with less boilerplate 
 ---
 
 # Usages
+Create `LocationRequest` object
 
-Initilize `LocationFetcher` in your activity or fragment
+Initialize `LocationFetcher` in your activity or fragment
 ```kotlin
  private val fetcher: LocationFetcher by lazy {
         LocationFetcher(

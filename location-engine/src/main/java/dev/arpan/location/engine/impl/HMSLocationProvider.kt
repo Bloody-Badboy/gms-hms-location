@@ -22,15 +22,9 @@ import timber.log.Timber
 
 internal class HMSLocationProvider(
     private val context: Context,
-    private val updateInterval: Long,
+    private val locationRequest: LocationRequest,
     private val locationReceiver: LocationReceiver?
 ) : ILocationFetcher {
-
-    private val locationRequest = LocationRequest().apply {
-        interval = updateInterval
-        fastestInterval = updateInterval / 2
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
 
     private val locationSettingsRequest = LocationSettingsRequest.Builder()
         .addLocationRequest(locationRequest)

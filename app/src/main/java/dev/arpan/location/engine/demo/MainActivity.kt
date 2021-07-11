@@ -1,6 +1,5 @@
 package dev.arpan.location.engine.demo
 
-import android.content.Intent
 import android.location.Address
 import android.location.Geocoder
 import android.os.Bundle
@@ -11,6 +10,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import dev.arpan.location.engine.LocationFetcher
 import dev.arpan.location.engine.LocationReceiver
+import dev.arpan.location.engine.LocationRequest
 import dev.arpan.location.engine.LocationSettingsActivity
 import dev.arpan.location.engine.demo.databinding.ActivityMainBinding
 import dev.arpan.location.engine.model.Location
@@ -44,11 +44,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val locationRequest = LocationRequest().apply {
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        interval = 20000L
+        fastestInterval = 10000L
+    }
+
     private val fetcher: LocationFetcher by lazy {
         LocationFetcher(
             context = this,
-            updateInterval = 4000L,
-            locationReceiver = object : LocationReceiver {
+            request = locationRequest,
+            receiver = object : LocationReceiver {
                 override fun onReceived(location: Location) {
                     binding.tvLocation.text = location.toString()
                     getAddress(location)
@@ -65,7 +71,12 @@ class MainActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.button.setOnClickListener {
-            activityResultLauncher.launch(Intent(this, LocationSettingsActivity::class.java))
+            activityResultLauncher.launch(
+                LocationSettingsActivity.buildIntent(
+                    this,
+                    locationRequest
+                )
+            )
         }
     }
 

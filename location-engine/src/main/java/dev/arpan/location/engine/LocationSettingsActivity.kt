@@ -2,6 +2,7 @@ package dev.arpan.location.engine
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -12,6 +13,13 @@ import timber.log.Timber
 
 class LocationSettingsActivity : Activity() {
     companion object {
+        private const val EXTRA_LOCATION_REQUEST = "location_request"
+
+        fun buildIntent(context: Context, request: LocationRequest) =
+            Intent(context, LocationSettingsActivity::class.java).apply {
+                putExtra(EXTRA_LOCATION_REQUEST, request)
+            }
+
         private const val REQUEST_CODE_LOCATION_PERMISSION = 100
         private const val REQUEST_CODE_LOCATION_SETTINGS = 101
 
@@ -21,7 +29,10 @@ class LocationSettingsActivity : Activity() {
     }
 
     private val fetcher: LocationFetcher by lazy(LazyThreadSafetyMode.NONE) {
-        LocationFetcher(this)
+        LocationFetcher(
+            this,
+            checkNotNull(intent.getParcelableExtra(EXTRA_LOCATION_REQUEST))
+        )
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +81,9 @@ class LocationSettingsActivity : Activity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == REQUEST_CODE_LOCATION_PERMISSION &&
+            grantResults[0] == PackageManager.PERMISSION_GRANTED
+        ) {
             checkDeviceLocationSettings()
         } else {
             if (isLocationPermissionPermanentlyDenied) {
