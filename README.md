@@ -7,12 +7,29 @@ A library to request location update for both GMS and HMS with less boilerplate 
 ---
 
 # Usages
+
+### Gradle
+Add below codes to your **root** `build.gradle` file (not your module build.gradle file).
+```gradle
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+```
+And add a dependency code to your **module**'s `build.gradle` file.
+```gradle
+dependencies {
+    implementation 'dev.arpan:location-engine:1.0.1'
+}
+```
+
 Create `LocationRequest` object
 ```kotlin
 private val locationRequest = LocationRequest().apply {
     priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    interval = 20000L
-    fastestInterval = 10000L
+    interval = 20000L // default is 10000
+    fastestInterval = 10000L // default is (10000 / 6)
 }
 ```
 
@@ -47,6 +64,7 @@ check the result in `onActivityResult` and start location update
         if (requestCode == 100){
             when (resultCode) {
                 RESULT_OK -> {
+                    // start requesing locatoin updates
                     fetcher.startLocationUpdates()
                 }
                 LocationSettingsActivity.RESULT_PERMISSION_DENIED -> {
