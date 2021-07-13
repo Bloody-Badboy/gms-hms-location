@@ -24,6 +24,11 @@ dependencies {
 }
 ```
 
+Add permission to your `AndroidManifest.xml`
+```xml
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+```
+
 Create `LocationRequest` object
 ```kotlin
 private val locationRequest = LocationRequest().apply {
