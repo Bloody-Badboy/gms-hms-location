@@ -7,31 +7,29 @@ import dev.arpan.location.engine.util.ApiAvailabilityUtil
 
 class LocationFetcher(
     context: Context,
-    request: LocationRequest,
-    receiver: LocationReceiver? = null
+    request: LocationRequest
 ) : ILocationFetcher {
 
-    private val locationFetcher: ILocationFetcher =
+    private val locationFetcher: ILocationFetcher by lazy {
         if (ApiAvailabilityUtil.isGmsAvailable(context)) {
             GoogleLocationProvider(
                 context,
-                request.toGoogleLocationRequest(),
-                receiver
+                request.toGoogleLocationRequest()
             )
         } else {
             HMSLocationProvider(
                 context,
-                request.toHMSLocationRequest(),
-                receiver
+                request.toHMSLocationRequest()
             )
         }
+    }
 
     override fun checkDeviceLocationSettings(callback: LocationSettingCallback) {
         locationFetcher.checkDeviceLocationSettings(callback)
     }
 
-    override fun startLocationUpdates() {
-        locationFetcher.startLocationUpdates()
+    override fun startLocationUpdates(receiver: LocationReceiver) {
+        locationFetcher.startLocationUpdates(receiver)
     }
 
     override fun stopLocationUpdates() {

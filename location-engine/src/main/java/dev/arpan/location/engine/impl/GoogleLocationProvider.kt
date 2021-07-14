@@ -1,6 +1,7 @@
 package dev.arpan.location.engine.impl
 
-import android.Manifest
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.Context
 import android.content.IntentSender
 import android.os.Looper
@@ -23,8 +24,7 @@ import timber.log.Timber
 
 internal class GoogleLocationProvider(
     private val context: Context,
-    private val locationRequest: LocationRequest,
-    private val locationReceiver: LocationReceiver?
+    private val locationRequest: LocationRequest
 ) : ILocationFetcher {
 
     private val locationSettingsRequest = LocationSettingsRequest.Builder()
@@ -35,6 +35,7 @@ internal class GoogleLocationProvider(
     private val fusedLocationProviderClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
+    private var locationReceiver: LocationReceiver? = null
     private var isRequestingLocationUpdates = false
 
     private val locationCallback = object : LocationCallback() {
@@ -42,7 +43,7 @@ internal class GoogleLocationProvider(
             locationResult?.let {
                 if (it.locations.isNotEmpty()) {
                     val location = it.locations[0]
-                    locationReceiver?.onReceived(Location.fromLocation(location))
+                    locationReceiver?.onReceived(null, Location.fromLocation(location))
                 }
             }
         }
@@ -74,18 +75,23 @@ internal class GoogleLocationProvider(
             }
     }
 
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    override fun startLocationUpdates() {
+    @RequiresPermission(anyOf = [ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION])
+    override fun startLocationUpdates(receiver: LocationReceiver) {
+        locationReceiver = receiver
         if (!isRequestingLocationUpdates) {
             try {
                 fusedLocationProviderClient.requestLocationUpdates(
                     locationRequest,
                     locationCallback,
                     Looper.myLooper()!!
-                )
-                isRequestingLocationUpdates = !isRequestingLocationUpdates
+                ).addOnSuccessListener {
+                    isRequestingLocationUpdates = !isRequestingLocationUpdates
+                }.addOnFailureListener { exception ->
+                    locationReceiver?.onReceived(exception, null)
+                }
             } catch (e: SecurityException) {
                 e.printStackTrace()
+                locationReceiver?.onReceived(e, null)
             }
         }
     }

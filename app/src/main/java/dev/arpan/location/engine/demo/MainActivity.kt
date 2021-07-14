@@ -29,7 +29,22 @@ class MainActivity : AppCompatActivity() {
     ) { activityResult ->
         when (activityResult.resultCode) {
             RESULT_OK -> {
-                fetcher.startLocationUpdates()
+                fetcher.startLocationUpdates(object : LocationReceiver {
+
+                    override fun onReceived(error: Throwable?, location: Location?) {
+                        if (location != null) {
+                            binding.tvLocation.text = location.toString()
+                            getAddress(location)
+                        }
+                        if (error != null) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Failed to request location updates " + error.stackTraceToString(),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                })
             }
             LocationSettingsActivity.RESULT_PERMISSION_DENIED -> {
                 Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show()
@@ -53,13 +68,7 @@ class MainActivity : AppCompatActivity() {
     private val fetcher: LocationFetcher by lazy {
         LocationFetcher(
             context = this,
-            request = locationRequest,
-            receiver = object : LocationReceiver {
-                override fun onReceived(location: Location) {
-                    binding.tvLocation.text = location.toString()
-                    getAddress(location)
-                }
-            }
+            request = locationRequest
         )
     }
 

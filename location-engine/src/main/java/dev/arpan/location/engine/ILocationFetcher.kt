@@ -4,7 +4,7 @@ internal interface ILocationFetcher {
 
     fun checkDeviceLocationSettings(callback: LocationSettingCallback)
 
-    fun startLocationUpdates()
+    fun startLocationUpdates(receiver: LocationReceiver)
 
     fun stopLocationUpdates()
 }

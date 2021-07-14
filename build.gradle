@@ -15,6 +15,7 @@ buildscript {
 
 plugins {
     id("com.diffplug.gradle.spotless") version "4.5.1"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version '0.6.0'
 }
 
 allprojects {
@@ -54,4 +55,8 @@ subprojects {
             mustRunAfter("spotlessCheck")
         }
     }
+}
+
+apiValidation {
+    ignoredProjects += ["app"]
 }
