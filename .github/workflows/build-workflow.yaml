@@ -31,13 +31,6 @@ jobs:
       - name: Build the app
         run: ./gradlew spotlessCheck apiCheck assembleDebug --stacktrace
 
-      - name: Upload build reports
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: build-reports
-          path: mobile/build/reports/
-
   deploy-snapshot:
     name: Deploy snapshot
     runs-on: ubuntu-latest
